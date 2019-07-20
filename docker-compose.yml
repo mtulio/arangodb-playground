@@ -1,0 +1,33 @@
+---
+version: '3.2'
+
+networks:
+  net:
+
+services:
+  arangodb:
+    image: arangodb/arangodb:3.4.7
+    #volumes:
+    #  - ./data/:/var/lib/arangodb
+    #command:
+    #    - --config.file=/etc/myconf
+    ports:
+        - 8529:8529
+    networks:
+      - net
+    environment:
+      ARANGO_ROOT_PASSWORD: MyDB
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 2918.25M
+        reservations:
+          cpus: "0.1"
+          memory: 512M
+    # Swarm only
+    #restart_policy:
+    #    condition: on-failure
+    #    delay: 30s
+    #    max_attempts: 6
+    #    window: 120s
