@@ -67,3 +67,11 @@ class ADB(object):
             col = self.dbConn.createCollection(name=colName)
             print("Collection created.")
         return col
+
+    def query(self, q):
+        try:
+            return self.getDB().AQLQuery(q, rawResults=True, batchSize=100)
+        except Exception as e:
+            return [{
+                "error": e
+            }]
