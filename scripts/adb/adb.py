@@ -75,3 +75,34 @@ class ADB(object):
             return [{
                 "error": e
             }]
+
+    def queryKeyOrCreate(self, colName, key, field):
+        """
+        Find one Key and return it, or create when not exists.
+        Also save at least one attribute with key value in 'field'.
+        colName : Collection Name
+        key : Key on K/V DB
+        field : field name to save key's value   
+        """
+
+        col = self.getCollection(colName)
+        _id = colName + "/" + key
+        aql = ("RETURN DOCUMENT('" + _id + "')")
+        qResult = self.query(aql)
+
+        try:
+            if len(qResult) > 0:
+                if qResult[0]:
+                    return qResult[0]._key
+        except:
+            pass
+
+        try:
+            doc = col.createDocument()
+            doc._key = key
+            doc[field] = key
+            doc.save()
+        except Exception as e:
+            # print("# ERROR queryKeyOrCreate() creating document {}/{}: {}".format(colName, key, e))
+            pass
+        return key
