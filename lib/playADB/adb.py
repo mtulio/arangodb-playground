@@ -1,6 +1,7 @@
 import os
 try:
     from arango import ArangoClient
+    from arango import exceptions as AExceptions
 except Exception as e:
     print("ERROR importing pyArango lib: ", e)
 
@@ -21,7 +22,7 @@ class ADB(object):
 
         ## Init
         self.getConn()
-        self.getDB(db)
+        self.getDB(name=self.dbName)
 
     def getHostProto(self, hostProto):
         if not hostProto:
@@ -49,11 +50,7 @@ class ADB(object):
         return pwd
 
     def createConn(self):
-        return ArangoClient(
-                protocol=self.hostProto,
-                host=self.hostName,
-                port=self.hostPort
-            )
+        return ArangoClient(hosts="{}://{}:{}".format(self.hostProto, self.hostName, self.hostPort) )
 
     def getConn(self):
         if not self.conn:
@@ -102,11 +99,15 @@ class ADB(object):
 
         return self.dbConn
 
-    def getCollection(self, colName):
+    def getCollection(self, colName, edge=False):
         if not colName:
             print("Collection Name not provided.")
             return None
         
+        if not self.dbConn:
+            print(self.dbName)
+            self.dbConn = self.getDB(name=self.dbName)
+ 
         if self.dbConn.has_collection(colName):
             return self.dbConn.collection(colName)
 
@@ -114,8 +115,18 @@ class ADB(object):
             print("ERROR: Collection not found and forceCreate=false.")
             return None
 
-        return self.dbConn.create_collection(colName)
+        return self.dbConn.create_collection(colName, edge=edge)
 
 
     def insertDocument(self, col, doc):
-        meta = self.dbConn.insert_document(col, doc)
+        return self.dbConn.insert_document(col, doc)
+
+    def insertOrUpdateDocument(self, col, doc):
+        if doc['_key']:
+            if self.dbConn.has_document(col+'/'+doc['_key']):
+                newDoc = doc
+                newDoc['_id'] = col+'/'+doc['_key']
+                del newDoc['_key']
+                return self.dbConn.update_document(newDoc)
+
+        return self.insertDocument(col, doc)
