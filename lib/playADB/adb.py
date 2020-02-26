@@ -121,12 +121,12 @@ class ADB(object):
     def insertDocument(self, col, doc):
         return self.dbConn.insert_document(col, doc)
 
-    def insertOrUpdateDocument(self, col, doc):
+    def insertOrUpdateDocument(self, colName, doc):
         if doc['_key']:
-            if self.dbConn.has_document(col+'/'+doc['_key']):
+            if self.dbConn.has_document("{}/{}".format(colName, doc['_key']):
                 newDoc = doc
-                newDoc['_id'] = col+'/'+doc['_key']
+                newDoc['_id'] = "{}/{}".format(colName, doc['_key'])
                 del newDoc['_key']
                 return self.dbConn.update_document(newDoc)
 
-        return self.insertDocument(col, doc)
+        return self.insertDocument(colName, doc)
