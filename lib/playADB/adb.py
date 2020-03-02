@@ -123,7 +123,7 @@ class ADB(object):
 
     def insertOrUpdateDocument(self, colName, doc):
         if doc['_key']:
-            if self.dbConn.has_document("{}/{}".format(colName, doc['_key']):
+            if self.dbConn.has_document("{}/{}".format(colName, doc['_key'])):
                 newDoc = doc
                 newDoc['_id'] = "{}/{}".format(colName, doc['_key'])
                 del newDoc['_key']
